@@ -1,20 +1,15 @@
 import React, { useEffect, useState } from 'react';
 import leftPad from 'left-pad';
 import rightPad from 'right-pad';
+import PropTypes from 'prop-types';
 
-
-// In prod this will point to the user-specific endpoint
 const LEGACY_JSON_API =
-    'https://gist.githubusercontent.com/babasutra/7ec6b41369c2fcfbaeed8bb15edebec1/raw/24a98fd3042729fec2760143a78fdca60899eea2/sample.json';
+  'https://gist.githubusercontent.com/babasutra/7ec6b41369c2fcfbaeed8bb15edebec1/raw/24a98fd3042729fec2760143a78fdca60899eea2/sample.json';
 
-// Switch this before deploying to prod:
-const DEV_MODE = true;
-
+// Use environment variable to switch between dev and prod mode
+const DEV_MODE = process.env.NODE_ENV === 'development';
 
 async function fetchBalances() {
-
-
-
   if (DEV_MODE) {
     return fetchBalancesForDevelopment();
   } else {
@@ -23,10 +18,17 @@ async function fetchBalances() {
 }
 
 async function fetchBalancesFromMessyLegacyApi(url) {
-  const response = await fetch(url);
-  const data = await response.text();
-  const json = JSON.parse(data);
-  return json;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.text();
+    const json = JSON.parse(data);
+    return json;
+  } catch (error) {
+    console.error(`There was a problem with the fetch operation: ${error.message}`);
+  }
 }
 
 function fetchBalancesForDevelopment() {
@@ -47,7 +49,7 @@ export default function App() {
       setBalances(balances);
     }
     updateBalances();
-  }, [setBalances]);
+  }, []);
 
   return (
     <div className="App">
@@ -64,19 +66,43 @@ export default function App() {
   );
 }
 
+App.propTypes = {
+  balances: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      balance: PropTypes.number.isRequired,
+      priceUSD: PropTypes.number.isRequired
+    })
+  )
+};
+
 function TokenList({ tokenBalances }) {
-  return tokenBalances.map(TokenBalance);
+  return tokenBalances.map((tokenBalance, index) => <TokenBalance key={index} {...tokenBalance} />);
 }
 
-function TokenBalance({ name, balance, priceUSD }) {
+TokenList.propTypes = {
+  tokenBalances: PropTypes.arrayOf(
+    PropTypes.shape({
+      name: PropTypes.string.isRequired,
+      balance: PropTypes.number.isRequired,
+      priceUSD: PropTypes.number.isRequired
+    })
+  )
+};
+
+const TokenBalance = React.memo(function TokenBalance({ name, balance, priceUSD }) {
   return (
     <>
-            | {rightPad(name, 20)} |{leftPad(balance.toString(), 10)} |
+      | {rightPad(name, 20)} |{leftPad(balance.toString(), 10)} |
       {leftPad((balance * priceUSD).toString(), 10)} |
       <br />|{leftPad('', 46, '-')}|
       <br />
     </>
   );
-}
+});
 
-
+TokenBalance.propTypes = {
+  name: PropTypes.string.isRequired,
+  balance: PropTypes.number.isRequired,
+  priceUSD: PropTypes.number.isRequired
+};
