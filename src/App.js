@@ -6,8 +6,7 @@ import PropTypes from 'prop-types';
 const LEGACY_JSON_API =
   'https://gist.githubusercontent.com/babasutra/7ec6b41369c2fcfbaeed8bb15edebec1/raw/24a98fd3042729fec2760143a78fdca60899eea2/sample.json';
 
-// Use environment variable to switch between dev and prod mode
-const DEV_MODE = process.env.NODE_ENV === 'development';
+const DEV_MODE = process.env.NODE_ENV !== 'production';
 
 async function fetchBalances() {
   if (DEV_MODE) {
@@ -65,17 +64,6 @@ export default function App() {
     </div>
   );
 }
-
-App.propTypes = {
-  balances: PropTypes.arrayOf(
-    PropTypes.shape({
-      name: PropTypes.string.isRequired,
-      balance: PropTypes.number.isRequired,
-      priceUSD: PropTypes.number.isRequired
-    })
-  )
-};
-
 function TokenList({ tokenBalances }) {
   return tokenBalances.map((tokenBalance, index) => <TokenBalance key={index} {...tokenBalance} />);
 }

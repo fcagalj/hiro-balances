@@ -28,5 +28,14 @@
     "quotes": ["error", "single"],
     "semi": ["error", "always"],
     "react/prop-types": "off"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js"],
+      "rules": {
+        "no-unused-vars": "off",
+        "no-undef": "off"
+      }
+    }
+  ]
 }

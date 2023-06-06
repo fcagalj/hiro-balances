@@ -20,3 +20,4 @@
 
 9. ESLint: We want our code to look nice and consistent. Let's add some linting rules!
  
+10. Some refactoring: fetchBalances and helper functions should go to a separate file. That would also simplify testing it.
